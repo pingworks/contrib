@@ -61,7 +61,7 @@ const (
 )
 
 var (
-	keyFunc = framework.DeletionHandlingMetaNamespaceKeyFunc
+	keyFunc = cache.DeletionHandlingMetaNamespaceKeyFunc
 )
 
 type namedPortMapping map[string]string
@@ -160,7 +160,7 @@ func newLoadBalancerController(kubeClient clientset.Interface, resyncPeriod time
 	lbc.syncQueue = NewTaskQueue(lbc.sync)
 	lbc.ingQueue = NewTaskQueue(lbc.updateIngressStatus)
 
-	ingEventHandler := framework.ResourceEventHandlerFuncs{
+	ingEventHandler := cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
 			addIng := obj.(*extensions.Ingress)
 			if !isNGINXIngress(addIng) {
@@ -194,7 +194,7 @@ func newLoadBalancerController(kubeClient clientset.Interface, resyncPeriod time
 		},
 	}
 
-	secrEventHandler := framework.ResourceEventHandlerFuncs{
+	secrEventHandler := cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
 			addSecr := obj.(*api.Secret)
 			if lbc.secrReferenced(addSecr.Namespace, addSecr.Name) {
@@ -220,7 +220,7 @@ func newLoadBalancerController(kubeClient clientset.Interface, resyncPeriod time
 		},
 	}
 
-	eventHandler := framework.ResourceEventHandlerFuncs{
+	eventHandler := cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
 			lbc.syncQueue.enqueue(obj)
 		},
@@ -234,7 +234,7 @@ func newLoadBalancerController(kubeClient clientset.Interface, resyncPeriod time
 		},
 	}
 
-	mapEventHandler := framework.ResourceEventHandlerFuncs{
+	mapEventHandler := cache.ResourceEventHandlerFuncs{
 		UpdateFunc: func(old, cur interface{}) {
 			if !reflect.DeepEqual(old, cur) {
 				upCmap := cur.(*api.ConfigMap)
@@ -248,35 +248,35 @@ func newLoadBalancerController(kubeClient clientset.Interface, resyncPeriod time
 		},
 	}
 
-	lbc.ingLister.Store, lbc.ingController = framework.NewInformer(
+	lbc.ingLister.Store, lbc.ingController = cache.NewInformer(
 		&cache.ListWatch{
 			ListFunc:  ingressListFunc(lbc.client, namespace),
 			WatchFunc: ingressWatchFunc(lbc.client, namespace),
 		},
 		&extensions.Ingress{}, resyncPeriod, ingEventHandler)
 
-	lbc.endpLister.Store, lbc.endpController = framework.NewInformer(
+	lbc.endpLister.Store, lbc.endpController = cache.NewInformer(
 		&cache.ListWatch{
 			ListFunc:  endpointsListFunc(lbc.client, namespace),
 			WatchFunc: endpointsWatchFunc(lbc.client, namespace),
 		},
 		&api.Endpoints{}, resyncPeriod, eventHandler)
 
-	lbc.svcLister.Store, lbc.svcController = framework.NewInformer(
+	lbc.svcLister.Store, lbc.svcController = cache.NewInformer(
 		&cache.ListWatch{
 			ListFunc:  serviceListFunc(lbc.client, namespace),
 			WatchFunc: serviceWatchFunc(lbc.client, namespace),
 		},
-		&api.Service{}, resyncPeriod, framework.ResourceEventHandlerFuncs{})
+		&api.Service{}, resyncPeriod, cache.ResourceEventHandlerFuncs{})
 
-	lbc.secrLister.Store, lbc.secrController = framework.NewInformer(
+	lbc.secrLister.Store, lbc.secrController = cache.NewInformer(
 		&cache.ListWatch{
 			ListFunc:  secretsListFunc(lbc.client, namespace),
 			WatchFunc: secretsWatchFunc(lbc.client, namespace),
 		},
 		&api.Secret{}, resyncPeriod, secrEventHandler)
 
-	lbc.mapLister.Store, lbc.mapController = framework.NewInformer(
+	lbc.mapLister.Store, lbc.mapController = cache.NewInformer(
 		&cache.ListWatch{
 			ListFunc:  mapListFunc(lbc.client, namespace),
 			WatchFunc: mapWatchFunc(lbc.client, namespace),
