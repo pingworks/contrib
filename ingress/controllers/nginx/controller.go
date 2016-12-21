@@ -33,7 +33,7 @@ import (
 	"k8s.io/kubernetes/pkg/apis/extensions"
 	"k8s.io/kubernetes/pkg/client/cache"
 	"k8s.io/kubernetes/pkg/client/record"
-	client "k8s.io/kubernetes/pkg/client/unversioned"
+	clientset "k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
 	"k8s.io/kubernetes/pkg/labels"
 	"k8s.io/kubernetes/pkg/runtime"
 	"k8s.io/kubernetes/pkg/util/intstr"
@@ -90,7 +90,7 @@ func (npm namedPortMapping) getPortMappings() map[string]string {
 // loadBalancerController watches the kubernetes api and adds/removes services
 // from the loadbalancer
 type loadBalancerController struct {
-	client *client.Client
+	client clientset.Interface
 
 	ingController  *cache.Controller
 	endpController *cache.Controller
@@ -133,7 +133,7 @@ type loadBalancerController struct {
 }
 
 // newLoadBalancerController creates a controller for nginx loadbalancer
-func newLoadBalancerController(kubeClient *client.Client, resyncPeriod time.Duration,
+func newLoadBalancerController(kubeClient clientset.Interface, resyncPeriod time.Duration,
 	defaultSvc, namespace, nxgConfigMapName, tcpConfigMapName, udpConfigMapName,
 	defSSLCertificate, defHealthzURL string, runtimeInfo *podInfo) (*loadBalancerController, error) {
 
@@ -286,61 +286,61 @@ func newLoadBalancerController(kubeClient *client.Client, resyncPeriod time.Dura
 	return &lbc, nil
 }
 
-func ingressListFunc(c *client.Client, ns string) func(api.ListOptions) (runtime.Object, error) {
+func ingressListFunc(c clientset.Interface, ns string) func(api.ListOptions) (runtime.Object, error) {
 	return func(opts api.ListOptions) (runtime.Object, error) {
 		return c.Extensions().Ingress(ns).List(opts)
 	}
 }
 
-func ingressWatchFunc(c *client.Client, ns string) func(options api.ListOptions) (watch.Interface, error) {
+func ingressWatchFunc(c clientset.Interface, ns string) func(options api.ListOptions) (watch.Interface, error) {
 	return func(options api.ListOptions) (watch.Interface, error) {
 		return c.Extensions().Ingress(ns).Watch(options)
 	}
 }
 
-func serviceListFunc(c *client.Client, ns string) func(api.ListOptions) (runtime.Object, error) {
+func serviceListFunc(c clientset.Interface, ns string) func(api.ListOptions) (runtime.Object, error) {
 	return func(opts api.ListOptions) (runtime.Object, error) {
 		return c.Services(ns).List(opts)
 	}
 }
 
-func serviceWatchFunc(c *client.Client, ns string) func(options api.ListOptions) (watch.Interface, error) {
+func serviceWatchFunc(c clientset.Interface, ns string) func(options api.ListOptions) (watch.Interface, error) {
 	return func(options api.ListOptions) (watch.Interface, error) {
 		return c.Services(ns).Watch(options)
 	}
 }
 
-func endpointsListFunc(c *client.Client, ns string) func(api.ListOptions) (runtime.Object, error) {
+func endpointsListFunc(c clientset.Interface, ns string) func(api.ListOptions) (runtime.Object, error) {
 	return func(opts api.ListOptions) (runtime.Object, error) {
 		return c.Endpoints(ns).List(opts)
 	}
 }
 
-func endpointsWatchFunc(c *client.Client, ns string) func(options api.ListOptions) (watch.Interface, error) {
+func endpointsWatchFunc(c clientset.Interface, ns string) func(options api.ListOptions) (watch.Interface, error) {
 	return func(options api.ListOptions) (watch.Interface, error) {
 		return c.Endpoints(ns).Watch(options)
 	}
 }
 
-func secretsListFunc(c *client.Client, ns string) func(api.ListOptions) (runtime.Object, error) {
+func secretsListFunc(c clientset.Interface, ns string) func(api.ListOptions) (runtime.Object, error) {
 	return func(opts api.ListOptions) (runtime.Object, error) {
 		return c.Secrets(ns).List(opts)
 	}
 }
 
-func secretsWatchFunc(c *client.Client, ns string) func(options api.ListOptions) (watch.Interface, error) {
+func secretsWatchFunc(c clientset.Interface, ns string) func(options api.ListOptions) (watch.Interface, error) {
 	return func(options api.ListOptions) (watch.Interface, error) {
 		return c.Secrets(ns).Watch(options)
 	}
 }
 
-func mapListFunc(c *client.Client, ns string) func(api.ListOptions) (runtime.Object, error) {
+func mapListFunc(c clientset.Interface, ns string) func(api.ListOptions) (runtime.Object, error) {
 	return func(opts api.ListOptions) (runtime.Object, error) {
 		return c.ConfigMaps(ns).List(opts)
 	}
 }
 
-func mapWatchFunc(c *client.Client, ns string) func(options api.ListOptions) (watch.Interface, error) {
+func mapWatchFunc(c clientset.Interface, ns string) func(options api.ListOptions) (watch.Interface, error) {
 	return func(options api.ListOptions) (watch.Interface, error) {
 		return c.ConfigMaps(ns).Watch(options)
 	}
