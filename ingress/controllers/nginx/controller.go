@@ -34,7 +34,6 @@ import (
 	"k8s.io/kubernetes/pkg/client/cache"
 	"k8s.io/kubernetes/pkg/client/record"
 	client "k8s.io/kubernetes/pkg/client/unversioned"
-	"k8s.io/kubernetes/pkg/controller/framework"
 	"k8s.io/kubernetes/pkg/labels"
 	"k8s.io/kubernetes/pkg/runtime"
 	"k8s.io/kubernetes/pkg/util/intstr"
@@ -93,11 +92,11 @@ func (npm namedPortMapping) getPortMappings() map[string]string {
 type loadBalancerController struct {
 	client *client.Client
 
-	ingController  *framework.Controller
-	endpController *framework.Controller
-	svcController  *framework.Controller
-	secrController *framework.Controller
-	mapController  *framework.Controller
+	ingController  *cache.Controller
+	endpController *cache.Controller
+	svcController  *cache.Controller
+	secrController *cache.Controller
+	mapController  *cache.Controller
 
 	ingLister  StoreToIngressLister
 	svcLister  cache.StoreToServiceLister
