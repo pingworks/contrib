@@ -11,7 +11,7 @@ ifndef VERSION
 endif
 
 controller: controller.go clean
-	CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags \
+	CGO_ENABLED=1 GOOS=linux go build -v -a -installsuffix cgo -ldflags \
 		"-s -w -X main.version=${VERSION} -X main.gitRepo=${REPO_INFO}" \
 		-o nginx-ingress-controller
 
