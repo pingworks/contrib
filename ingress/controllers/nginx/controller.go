@@ -28,12 +28,13 @@ import (
 
 	"github.com/golang/glog"
 
-	"k8s.io/kubernetes/pkg/api"
+	api "k8s.io/kubernetes/pkg/api/v1"
 	podutil "k8s.io/kubernetes/pkg/api/pod"
 	"k8s.io/kubernetes/pkg/apis/extensions"
 	"k8s.io/kubernetes/pkg/client/cache"
 	"k8s.io/kubernetes/pkg/client/record"
 	clientset "k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
+	internalversioncore "k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset/typed/core/internalversion"
 	"k8s.io/kubernetes/pkg/labels"
 	"k8s.io/kubernetes/pkg/runtime"
 	"k8s.io/kubernetes/pkg/util/intstr"
@@ -139,7 +140,7 @@ func newLoadBalancerController(kubeClient clientset.Interface, resyncPeriod time
 
 	eventBroadcaster := record.NewBroadcaster()
 	eventBroadcaster.StartLogging(glog.Infof)
-	eventBroadcaster.StartRecordingToSink(kubeClient.Events(namespace))
+	eventBroadcaster.StartRecordingToSink(&internalversioncore.EventSinkImpl{Interface: kubeClient.Core().Events(namespace)})
 
 	lbc := loadBalancerController{
 		client:            kubeClient,
@@ -288,61 +289,61 @@ func newLoadBalancerController(kubeClient clientset.Interface, resyncPeriod time
 
 func ingressListFunc(c clientset.Interface, ns string) func(api.ListOptions) (runtime.Object, error) {
 	return func(opts api.ListOptions) (runtime.Object, error) {
-		return c.Extensions().Ingress(ns).List(opts)
+		return c.Extensions().Ingresses(ns).List(opts)
 	}
 }
 
 func ingressWatchFunc(c clientset.Interface, ns string) func(options api.ListOptions) (watch.Interface, error) {
 	return func(options api.ListOptions) (watch.Interface, error) {
-		return c.Extensions().Ingress(ns).Watch(options)
+		return c.Extensions().Ingresses(ns).Watch(options)
 	}
 }
 
 func serviceListFunc(c clientset.Interface, ns string) func(api.ListOptions) (runtime.Object, error) {
 	return func(opts api.ListOptions) (runtime.Object, error) {
-		return c.Services(ns).List(opts)
+		return c.Core().Services(ns).List(opts)
 	}
 }
 
 func serviceWatchFunc(c clientset.Interface, ns string) func(options api.ListOptions) (watch.Interface, error) {
 	return func(options api.ListOptions) (watch.Interface, error) {
-		return c.Services(ns).Watch(options)
+		return c.Core().Services(ns).Watch(options)
 	}
 }
 
 func endpointsListFunc(c clientset.Interface, ns string) func(api.ListOptions) (runtime.Object, error) {
 	return func(opts api.ListOptions) (runtime.Object, error) {
-		return c.Endpoints(ns).List(opts)
+		return c.Core().Endpoints(ns).List(opts)
 	}
 }
 
 func endpointsWatchFunc(c clientset.Interface, ns string) func(options api.ListOptions) (watch.Interface, error) {
 	return func(options api.ListOptions) (watch.Interface, error) {
-		return c.Endpoints(ns).Watch(options)
+		return c.Core().Endpoints(ns).Watch(options)
 	}
 }
 
 func secretsListFunc(c clientset.Interface, ns string) func(api.ListOptions) (runtime.Object, error) {
 	return func(opts api.ListOptions) (runtime.Object, error) {
-		return c.Secrets(ns).List(opts)
+		return c.Core().Secrets(ns).List(opts)
 	}
 }
 
 func secretsWatchFunc(c clientset.Interface, ns string) func(options api.ListOptions) (watch.Interface, error) {
 	return func(options api.ListOptions) (watch.Interface, error) {
-		return c.Secrets(ns).Watch(options)
+		return c.Core().Secrets(ns).Watch(options)
 	}
 }
 
 func mapListFunc(c clientset.Interface, ns string) func(api.ListOptions) (runtime.Object, error) {
 	return func(opts api.ListOptions) (runtime.Object, error) {
-		return c.ConfigMaps(ns).List(opts)
+		return c.Core().ConfigMaps(ns).List(opts)
 	}
 }
 
 func mapWatchFunc(c clientset.Interface, ns string) func(options api.ListOptions) (watch.Interface, error) {
 	return func(options api.ListOptions) (watch.Interface, error) {
-		return c.ConfigMaps(ns).Watch(options)
+		return c.Core().ConfigMaps(ns).Watch(options)
 	}
 }
 

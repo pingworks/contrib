@@ -27,7 +27,7 @@ import (
 
 	"k8s.io/kubernetes/pkg/api"
 	"k8s.io/kubernetes/pkg/apis/extensions"
-	client "k8s.io/kubernetes/pkg/client/unversioned"
+	clientset "k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
 )
 
 const (
@@ -113,7 +113,7 @@ func (a ingAnnotations) secretName() (string, error) {
 // rule used to add authentication in the paths defined in the rule
 // and generated an htpasswd compatible file to be used as source
 // during the authentication process
-func ParseAnnotations(kubeClient client.Interface, ing *extensions.Ingress, authDir string) (*Nginx, error) {
+func ParseAnnotations(kubeClient clientset.Interface, ing *extensions.Ingress, authDir string) (*Nginx, error) {
 	if ing.GetAnnotations() == nil {
 		return &Nginx{}, ErrMissingAnnotations
 	}

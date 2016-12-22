@@ -29,7 +29,7 @@ import (
 	apierrs "k8s.io/kubernetes/pkg/api/errors"
 	"k8s.io/kubernetes/pkg/apis/extensions"
 	"k8s.io/kubernetes/pkg/client/cache"
-	"k8s.io/kubernetes/pkg/client/unversioned"
+	clientset "k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
 	"k8s.io/kubernetes/pkg/util/wait"
 	"k8s.io/kubernetes/pkg/util/workqueue"
 )
@@ -115,7 +115,7 @@ func NewTaskQueue(syncFn func(string) error) *taskQueue {
 }
 
 // getPodDetails  returns runtime information about the pod: name, namespace and IP of the node
-func getPodDetails(kubeClient *unversioned.Client) (*podInfo, error) {
+func getPodDetails(kubeClient clientset.Interface) (*podInfo, error) {
 	podName := os.Getenv("POD_NAME")
 	podNs := os.Getenv("POD_NAMESPACE")
 
@@ -159,7 +159,7 @@ func getPodDetails(kubeClient *unversioned.Client) (*podInfo, error) {
 	}, nil
 }
 
-func isValidService(kubeClient *unversioned.Client, name string) error {
+func isValidService(kubeClient clientset.Interface, name string) error {
 	if name == "" {
 		return fmt.Errorf("empty string is not a valid service name")
 	}
@@ -219,7 +219,7 @@ func parseNsName(input string) (string, string, error) {
 	return nsName[0], nsName[1], nil
 }
 
-func waitForPodRunning(kubeClient *unversioned.Client, ns, podName string, interval, timeout time.Duration) error {
+func waitForPodRunning(kubeClient clientset.Interface, ns, podName string, interval, timeout time.Duration) error {
 	condition := func(pod *api.Pod) (bool, error) {
 		if pod.Status.Phase == api.PodRunning {
 			return true, nil
@@ -231,7 +231,7 @@ func waitForPodRunning(kubeClient *unversioned.Client, ns, podName string, inter
 }
 
 // waitForPodCondition waits for a pod in state defined by a condition (func)
-func waitForPodCondition(kubeClient *unversioned.Client, ns, podName string, condition func(pod *api.Pod) (bool, error),
+func waitForPodCondition(kubeClient clientset.Interface, ns, podName string, condition func(pod *api.Pod) (bool, error),
 	interval, timeout time.Duration) error {
 	return wait.PollImmediate(interval, timeout, func() (bool, error) {
 		pod, err := kubeClient.Pods(ns).Get(podName)

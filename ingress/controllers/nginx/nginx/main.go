@@ -23,7 +23,7 @@ import (
 
 	"github.com/golang/glog"
 
-	client "k8s.io/kubernetes/pkg/client/unversioned"
+	clientset "k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
 	"k8s.io/kubernetes/pkg/util/flowcontrol"
 
 	"k8s.io/contrib/ingress/controllers/nginx/nginx/config"
@@ -67,7 +67,7 @@ func NewUpstream(name string) *ingress.Upstream {
 }
 
 // NewManager ...
-func NewManager(kubeClient *client.Client) *Manager {
+func NewManager(kubeClient clientset.Interface) *Manager {
 	ngx := &Manager{
 		ConfigFile:        "/etc/nginx/nginx.conf",
 		defCfg:            config.NewDefault(),
